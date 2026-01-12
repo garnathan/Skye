@@ -50,12 +50,14 @@ from blueprints.logs import logs_bp
 from blueprints.tools import tools_bp
 from blueprints.pages import pages_bp
 from blueprints.music_next import music_next_bp
+from blueprints.gemini import gemini_bp
 
 app.register_blueprint(weather_bp)
 app.register_blueprint(logs_bp)
 app.register_blueprint(tools_bp)
 app.register_blueprint(pages_bp)
 app.register_blueprint(music_next_bp)
+app.register_blueprint(gemini_bp)
 
 def discover_pages():
     """Automatically discover pages from the pages directory"""
@@ -125,125 +127,7 @@ def favicon():
 
 # Pages routes moved to blueprints/pages.py
 
-@app.route('/api/gemini/models', methods=['GET'])
-def list_gemini_models():
-    """List available Gemini models"""
-    try:
-        
-        # Get API key from config file or environment
-        config = load_config()
-        api_key = config.get('gemini_api_key') or os.environ.get('GEMINI_API_KEY')
-        if not api_key or api_key == 'your_gemini_api_key_here':
-            return jsonify({'error': 'Gemini API key not configured'}), 500
-        
-        # Configure Gemini
-        genai.configure(api_key=api_key)
-        
-        # List models
-        models = []
-        for model in genai.list_models():
-            if 'generateContent' in model.supported_generation_methods:
-                models.append({
-                    'name': model.name,
-                    'display_name': model.display_name or model.name
-                })
-        
-        return jsonify({'models': models})
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/gemini/chat', methods=['POST'])
-@require_config_key('gemini_api_key', 'Gemini API key not configured. Please set your API key in config.json')
-@handle_api_errors
-def gemini_chat():
-    """Handle Gemini chat requests"""
-
-    data = request.get_json()
-    message = data.get('message', '').strip()
-    model_name = data.get('model', 'models/gemini-pro')
-
-    app.logger.info(f"Gemini chat request with model: {model_name}, message length: {len(message)}")
-
-    if not message:
-        app.logger.warning("Gemini chat request failed: No message provided")
-        return jsonify({'error': 'No message provided'}), 400
-
-    api_key = get_config_value('gemini_api_key') or os.environ.get('GEMINI_API_KEY')
-    genai.configure(api_key=api_key)
-
-    model = genai.GenerativeModel(model_name)
-    response = model.generate_content(message)
-
-    if response.text:
-        app.logger.info(f"Gemini chat response generated, length: {len(response.text)}")
-        return jsonify({'response': response.text})
-
-    app.logger.error("Gemini chat failed: No response generated")
-    return jsonify({'error': 'No response generated'}), 500
-
-@app.route('/api/pipeline-stats', methods=['GET'])
-def run_pipeline_stats():
-    """Run the critical pipeline stats script with streaming output"""
-    import subprocess
-    
-    def generate():
-        script_path = os.path.join(os.path.dirname(__file__), '../PipelineStats/critical_pipeline_stats.py')
-        
-        if not os.path.exists(script_path):
-            yield f"data: {{\"output\": \"Script not found at: {script_path}\", \"status\": \"error\"}}\\n\\n"
-            return
-        
-        try:
-            yield f"data: {{\"output\": \"Starting pipeline analysis...\\n\", \"status\": \"running\"}}\\n\\n"
-            
-            process = subprocess.Popen(
-                [sys.executable, script_path],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                bufsize=1,
-                universal_newlines=True,
-                cwd=os.path.dirname(script_path)
-            )
-            
-            # Read output line by line
-            while True:
-                output = process.stdout.readline()
-                if output == '' and process.poll() is not None:
-                    break
-                if output:
-                    # Escape quotes and newlines for JSON
-                    escaped_line = output.strip().replace('\\', '\\\\').replace('"', '\\"')
-                    yield f"data: {{\"output\": \"{escaped_line}\\n\", \"status\": \"running\"}}\\n\\n"
-            
-            # Check for any remaining output
-            remaining_output = process.stdout.read()
-            if remaining_output:
-                escaped_output = remaining_output.strip().replace('\\', '\\\\').replace('"', '\\"')
-                yield f"data: {{\"output\": \"{escaped_output}\\n\", \"status\": \"running\"}}\\n\\n"
-            
-            # Check for errors
-            stderr_output = process.stderr.read()
-            if stderr_output:
-                escaped_error = stderr_output.strip().replace('\\', '\\\\').replace('"', '\\"')
-                yield f"data: {{\"output\": \"Error: {escaped_error}\\n\", \"status\": \"error\"}}\\n\\n"
-            
-            return_code = process.poll()
-            if return_code == 0:
-                yield f"data: {{\"output\": \"\\nScript completed successfully.\", \"status\": \"success\"}}\\n\\n"
-            else:
-                yield f"data: {{\"output\": \"\\nScript failed with return code: {return_code}\", \"status\": \"error\"}}\\n\\n"
-                
-        except Exception as e:
-            yield f"data: {{\"output\": \"Error: {str(e)}\", \"status\": \"error\"}}\\n\\n"
-    
-    return Response(generate(), mimetype='text/event-stream', headers={
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Cache-Control'
-    })
+# Gemini routes moved to blueprints/gemini.py
 
 @app.route('/api/youtube/playlists', methods=['GET'])
 def get_youtube_playlists():
