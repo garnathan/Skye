@@ -10,27 +10,39 @@ def get_content():
 
         <div class="current-weather">
             <div class="weather-main">
-                <div class="weather-icon-large" id="currentIcon">
-                    <i class="fas fa-spinner fa-spin"></i>
-                </div>
-                <div class="weather-widget-group">
-                    <div class="weather-temp">
-                        <div class="temp-value" id="currentTemp">--</div>
-                        <div class="temp-unit">°C</div>
+                <div class="weather-hero">
+                    <div class="weather-icon-large" id="currentIcon">
+                        <i class="fas fa-spinner fa-spin"></i>
                     </div>
-                    <div class="weather-feels-like">
-                        <div class="feels-like-value" id="feelsLikeValue">--</div>
-                        <div class="feels-like-label">Feels like</div>
+                    <div class="weather-primary">
+                        <div class="temp-display">
+                            <span class="temp-value" id="currentTemp">--</span>
+                            <span class="temp-unit">°C</span>
+                        </div>
+                        <div class="weather-description" id="weatherDescription">Loading...</div>
                     </div>
                 </div>
-                <div class="weather-wind">
-                    <div class="wind-arrow" id="windArrow">
-                        <i class="fas fa-arrow-up"></i>
+
+                <div class="weather-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-thermometer-half"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Feels like</div>
+                            <div class="stat-value" id="feelsLikeValue">--°C</div>
+                        </div>
                     </div>
-                    <div class="wind-speed-value" id="windSpeedValue">--</div>
-                    <div class="wind-unit">km/h</div>
+                    <div class="stat-card">
+                        <div class="stat-icon wind-icon" id="windArrow">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Wind</div>
+                            <div class="stat-value" id="windSpeedValue">-- km/h</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="weather-description" id="weatherDescription">Loading...</div>
             </div>
 
             <div class="weather-details">
@@ -118,89 +130,114 @@ def get_content():
 
     .weather-main {
         display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .weather-hero {
+        display: flex;
         align-items: center;
         justify-content: center;
-        gap: 6rem;
-        margin-bottom: 2rem;
+        gap: 3rem;
         flex-wrap: wrap;
     }
 
     .weather-icon-large {
+        font-size: 8rem;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+    }
+
+    .weather-primary {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .temp-display {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .temp-value {
         font-size: 6rem;
-    }
-
-    .weather-widget-group {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .weather-temp,
-    .weather-wind {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-width: 180px;
-        padding: 1.5rem;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        backdrop-filter: blur(10px);
-    }
-
-    .weather-feels-like {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-width: 180px;
-        padding: 1rem 1.5rem;
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 15px;
-        backdrop-filter: blur(10px);
-    }
-
-    .temp-value,
-    .wind-speed-value {
-        font-size: 5rem;
-        font-weight: bold;
+        font-weight: 300;
         line-height: 1;
+        letter-spacing: -0.02em;
     }
 
-    .feels-like-value {
+    .temp-unit {
         font-size: 2.5rem;
-        font-weight: bold;
-        line-height: 1;
-    }
-
-    .temp-unit,
-    .wind-unit {
-        font-size: 1.5rem;
-        margin-top: 0.5rem;
+        font-weight: 300;
         opacity: 0.8;
-    }
-
-    .feels-like-label {
-        font-size: 0.9rem;
-        margin-top: 0.25rem;
-        opacity: 0.7;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .wind-arrow {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        transition: transform 0.5s ease;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        margin-top: 0.5rem;
     }
 
     .weather-description {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         text-transform: capitalize;
-        text-align: center;
+        opacity: 0.9;
+        font-weight: 400;
+    }
+
+    .weather-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        max-width: 600px;
+        margin: 0 auto;
         width: 100%;
-        margin-top: 0.5rem;
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+        transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        opacity: 0.9;
+        min-width: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .wind-icon {
+        transition: transform 0.5s ease;
+    }
+
+    .stat-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        opacity: 0.75;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 600;
+        line-height: 1;
     }
 
     .weather-details {
@@ -460,32 +497,41 @@ def get_content():
             padding: 2rem 1rem;
         }
 
-        .weather-main {
-            gap: 1rem;
-        }
-
-        .temp-value,
-        .wind-speed-value {
-            font-size: 3.5rem;
-        }
-
-        .feels-like-value {
-            font-size: 2rem;
-        }
-
-        .weather-temp,
-        .weather-wind,
-        .weather-feels-like {
-            min-width: 140px;
-            padding: 1rem;
-        }
-
-        .wind-arrow {
-            font-size: 3rem;
+        .weather-hero {
+            gap: 2rem;
         }
 
         .weather-icon-large {
+            font-size: 5rem;
+        }
+
+        .temp-value {
             font-size: 4rem;
+        }
+
+        .temp-unit {
+            font-size: 2rem;
+        }
+
+        .weather-description {
+            font-size: 1.1rem;
+        }
+
+        .weather-stats {
+            grid-template-columns: 1fr;
+            max-width: 100%;
+        }
+
+        .stat-card {
+            padding: 1.25rem;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
         }
 
         .weather-details {
@@ -634,7 +680,7 @@ def get_content():
         document.getElementById('currentTemp').textContent = Math.round(current.temperature);
 
         // Update wind display with rotation
-        document.getElementById('windSpeedValue').textContent = Math.round(current.windSpeed);
+        document.getElementById('windSpeedValue').textContent = `${Math.round(current.windSpeed)} km/h`;
         const windArrow = document.getElementById('windArrow');
         windArrow.style.transform = `rotate(${current.windDirection}deg)`;
         windArrow.title = `Wind from ${getWindDirection(current.windDirection)}`;
