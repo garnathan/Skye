@@ -57,24 +57,26 @@ def main():
     
     # Create .env from example if it doesn't exist
     print("\n[4/5] Setting up configuration...")
-    if not os.path.exists('.env') and os.path.exists('.env.example'):
-        shutil.copy('.env.example', '.env')
+    env_example_path = 'config/.env.example'
+    env_path = '.env'
+    if not os.path.exists(env_path) and os.path.exists(env_example_path):
+        shutil.copy(env_example_path, env_path)
         print("  ✓ Created .env from template")
         print("  ⚠ Edit .env to add your API keys")
-    elif os.path.exists('.env'):
+    elif os.path.exists(env_path):
         print("  ✓ .env already exists")
     else:
-        print("  ⚠ No .env.example found")
+        print("  ⚠ No config/.env.example found")
     
     # Start keep_alive monitor
     print("\n[5/5] Starting Skye monitor...")
-    
+
     # Kill any existing processes
     run('pkill -f "python.*keep_alive.py"', check=False)
     run('pkill -f "python.*app.py"', check=False)
-    
+
     # Start monitor in background
-    if run(f'nohup {sys.executable} keep_alive.py > /tmp/keep_alive.log 2>&1 &', check=False):
+    if run(f'nohup {sys.executable} scripts/keep_alive.py > /tmp/keep_alive.log 2>&1 &', check=False):
         print("  ✓ Skye monitor started")
         print("\n" + "=" * 60)
         print("Installation complete!")
@@ -85,11 +87,14 @@ def main():
         print("\nTo stop: pkill -f keep_alive.py")
         print("\nNext steps:")
         print("  1. Edit .env with your API keys")
-        print("  2. Restart: pkill -f keep_alive.py && python3 keep_alive.py &")
+        print("  2. Restart: pkill -f keep_alive.py && python3 scripts/keep_alive.py &")
     else:
         print("  ✗ Failed to start monitor")
         sys.exit(1)
 
 if __name__ == '__main__':
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    # Change to parent directory (Skye root)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    skye_dir = os.path.dirname(script_dir)
+    os.chdir(skye_dir)
     main()

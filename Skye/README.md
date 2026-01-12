@@ -6,23 +6,25 @@ A modular web application that automatically discovers and displays pages based 
 
 ### Option 1: Simple Start
 ```bash
-cd src/Skye
 python3 app.py
 ```
 
 ### Option 2: Always Running (Recommended)
 ```bash
-cd src/Skye
-./launch_skye.sh
+./scripts/launch_skye.sh
 ```
 
 ### Option 3: Manual Control
 ```bash
-cd src/Skye
-./start_skye.sh start    # Start Skye
-./start_skye.sh status   # Check status
-./start_skye.sh stop     # Stop Skye
-./start_skye.sh restart  # Restart Skye
+./scripts/start_skye.sh start    # Start Skye
+./scripts/start_skye.sh status   # Check status
+./scripts/start_skye.sh stop     # Stop Skye
+./scripts/start_skye.sh restart  # Restart Skye
+```
+
+### Option 4: Full Installation
+```bash
+python3 scripts/install.py
 ```
 
 Visit http://localhost:5001

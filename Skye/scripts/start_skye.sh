@@ -1,6 +1,7 @@
 #!/bin/bash
 
-SKYE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SKYE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 PID_FILE="$SKYE_DIR/skye.pid"
 LOG_FILE="$SKYE_DIR/skye.log"
 
@@ -9,7 +10,7 @@ start_skye() {
         echo "Skye is already running (PID: $(cat $PID_FILE))"
         return 0
     fi
-    
+
     echo "Starting Skye..."
     cd "$SKYE_DIR"
     nohup python3 app.py > "$LOG_FILE" 2>&1 &
