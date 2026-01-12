@@ -1,9 +1,24 @@
 #!/usr/bin/env python3
-from flask import Flask, render_template, jsonify, request, Response
+# Standard library imports
 import os
-import importlib.util
-import subprocess
+import sys
 import json
+import logging
+import subprocess
+import threading
+import importlib.util
+import urllib.request
+import urllib.parse
+from datetime import datetime, timedelta
+from collections import deque
+from urllib.parse import urlparse, parse_qs
+
+# Third-party imports
+import requests
+import google.generativeai as genai
+
+# Flask imports
+from flask import Flask, render_template, jsonify, request, Response, session
 
 # Load environment variables from .env file
 try:
@@ -17,11 +32,6 @@ app = Flask(__name__)
 # ============================================================================
 # LOG MANAGEMENT SYSTEM - Must be set up immediately after app creation
 # ============================================================================
-
-import logging
-from datetime import datetime, timedelta
-from collections import deque
-import threading
 
 # In-memory log storage (with max size to prevent memory issues)
 # Storing last 500 logs - approximately 50-100KB memory usage
@@ -155,7 +165,6 @@ def api_pages():
 def list_gemini_models():
     """List available Gemini models"""
     try:
-        import google.generativeai as genai
         
         # Get API key from config file or environment
         config = load_config()
@@ -185,7 +194,6 @@ def list_gemini_models():
 @handle_api_errors
 def gemini_chat():
     """Handle Gemini chat requests"""
-    import google.generativeai as genai
 
     data = request.get_json()
     message = data.get('message', '').strip()
@@ -213,9 +221,7 @@ def gemini_chat():
 @app.route('/api/pipeline-stats', methods=['GET'])
 def run_pipeline_stats():
     """Run the critical pipeline stats script with streaming output"""
-    from flask import Response
     import subprocess
-    import sys
     
     def generate():
         script_path = os.path.join(os.path.dirname(__file__), '../PipelineStats/critical_pipeline_stats.py')
@@ -279,7 +285,6 @@ def run_pipeline_stats():
 def get_youtube_playlists():
     """Get playlists for a YouTube channel"""
     try:
-        import requests
         
         channel_input = request.args.get('channel', '').strip()
         if not channel_input:
@@ -421,7 +426,6 @@ def get_youtube_playlists():
 def get_playlist_videos():
     """Get videos from a playlist"""
     try:
-        import requests
         
         playlist_id = request.args.get('playlistId', '').strip()
         if not playlist_id:
@@ -507,7 +511,6 @@ def youtube_oauth_authorize(account_type):
 def youtube_oauth_callback():
     """Handle YouTube OAuth callback"""
     try:
-        import requests
         
         code = request.args.get('code')
         state = request.args.get('state')  # source or destination
@@ -538,7 +541,6 @@ def youtube_oauth_callback():
         if token_response.status_code == 200:
             token_info = token_response.json()
             # Store tokens separately for source and destination
-            from flask import session
             session[f'youtube_{state}_access_token'] = token_info.get('access_token')
             session[f'youtube_{state}_refresh_token'] = token_info.get('refresh_token')
             
@@ -564,8 +566,6 @@ def youtube_oauth_callback():
 def copy_playlists():
     """Copy playlists using OAuth authentication"""
     try:
-        import requests
-        from flask import session
 
         # Check if both accounts are authenticated
         source_token = session.get('youtube_source_access_token')
@@ -724,7 +724,6 @@ def get_stock_data():
 def get_currency_data():
     """Get currency data using Yahoo Finance"""
     try:
-        import requests
         from datetime import datetime
 
         period = request.args.get('period', '1y')
@@ -790,7 +789,6 @@ def get_currency_data():
 def get_current_price():
     """Get current price using the same API as chart data"""
     try:
-        import requests
         
         symbol = request.args.get('symbol', 'AMZN')
         
@@ -817,7 +815,6 @@ def get_current_price():
 def get_currency_rate():
     """Get current USD to EUR rate using Yahoo Finance"""
     try:
-        import requests
         
         # Use Yahoo Finance v8 API like stock data
         url = 'https://query1.finance.yahoo.com/v8/finance/chart/EURUSD=X'
@@ -844,7 +841,6 @@ def get_currency_rate():
 def get_xrp_data():
     """Get XRP price data in EUR using Yahoo Finance"""
     try:
-        import requests
         from datetime import datetime
         
         period = request.args.get('period', '1y')
@@ -905,7 +901,6 @@ def get_xrp_data():
 def get_xrp_price():
     """Get current XRP price in EUR using Yahoo Finance"""
     try:
-        import requests
         
         # Use Yahoo Finance API for XRP-EUR
         url = 'https://query1.finance.yahoo.com/v8/finance/chart/XRP-EUR'
@@ -930,7 +925,6 @@ def get_xrp_price():
 def get_gold_data():
     """Get Gold price data in EUR using Yahoo Finance"""
     try:
-        import requests
         from datetime import datetime
         
         period = request.args.get('period', '1y')
@@ -1042,7 +1036,6 @@ def get_gold_data():
 def get_gold_price():
     """Get current Gold price in EUR using Yahoo Finance"""
     try:
-        import requests
         
         # Get EUR/USD rate first with multiple fallbacks
         eur_usd_rate = 1.1  # Default fallback
@@ -1102,7 +1095,6 @@ def get_gold_price():
 def get_sell_recommendation():
     """Analyze AMZN stock and USD/EUR trends to recommend selling with percentage score"""
     try:
-        import requests
         from datetime import datetime, timedelta
         
         headers = {'User-Agent': 'Mozilla/5.0'}
@@ -1242,7 +1234,6 @@ def get_sell_recommendation():
 def get_portfolio_value():
     """Get portfolio value of 287 AMZN shares in EUR over time"""
     try:
-        import requests
         from datetime import datetime
 
         period = request.args.get('period', '1y')
@@ -1332,7 +1323,6 @@ def get_portfolio_value():
 def get_cash_assets_value():
     """Get historical value of EUR cash assets (105,595.85 EUR today) converted to what they were worth over time"""
     try:
-        import requests
         from datetime import datetime
 
         period = request.args.get('period', '1y')
@@ -1417,7 +1407,6 @@ def get_cash_assets_value():
 def get_recommendation_history():
     """Get historical recommendation scores over 6 months"""
     try:
-        import requests
         from datetime import datetime
 
         headers = {'User-Agent': 'Mozilla/5.0'}
@@ -1527,7 +1516,6 @@ def get_recommendation_history():
 def vrt_calculate():
     """Calculate VRT for vehicle import to Ireland"""
     try:
-        import requests
         from datetime import datetime
         
         data = request.get_json()
@@ -1647,7 +1635,6 @@ def download_youtube_audio():
         import subprocess
         import tempfile
         import base64
-        from urllib.parse import urlparse, parse_qs
         
         data = request.get_json()
         url = data.get('url', '').strip()
@@ -1720,7 +1707,6 @@ def download_youtube_audio():
 def music_next_search():
     """Search for similar artists on music-map.com"""
     try:
-        import requests
         import re
 
         artist = request.args.get('artist', '').strip()
@@ -2049,7 +2035,6 @@ def music_next_current():
 def get_weather():
     """Get weather forecast from Met Éireann API"""
     try:
-        import requests
         import xml.etree.ElementTree as ET
         from datetime import datetime
 
@@ -2172,9 +2157,6 @@ def music_next_history():
 def music_next_artist_image():
     """Get artist image from Wikipedia"""
     try:
-        import urllib.request
-        import json as json_lib
-        import urllib.parse
 
         artist = request.args.get('artist', '').strip()
         if not artist:
