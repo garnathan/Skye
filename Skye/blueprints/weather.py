@@ -97,8 +97,8 @@ def get_weather():
                 current_weather = weather_data.copy()
                 current_weather['description'] = symbol_elem.get('id', 'Cloud').replace('_', ' ') if symbol_elem is not None else 'Cloudy'
 
-            # Collect hourly forecast for today (next 24 hours)
-            if len(hourly_forecast) < 24:
+            # Collect hourly forecast for 7 days (168 hours)
+            if len(hourly_forecast) < 168:
                 hourly_forecast.append(weather_data)
 
         return jsonify({

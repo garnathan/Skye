@@ -15,7 +15,7 @@ music_next_bp = Blueprint('music_next', __name__)
 
 def get_config_path():
     """Get the path to music_recommendations.json"""
-    return os.path.join(os.path.dirname(__file__), '..', 'music_recommendations.json')
+    return os.path.join(os.path.dirname(__file__), '..', 'config', 'music_recommendations.json')
 
 
 @music_next_bp.route('/api/music-next/search', methods=['GET'])

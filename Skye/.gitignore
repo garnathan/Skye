@@ -1,5 +1,10 @@
 # Environment variables
 .env
+config/.env
+
+# Configuration files (keep examples)
+config/config.json
+config/music_recommendations.json
 
 # Python
 __pycache__/

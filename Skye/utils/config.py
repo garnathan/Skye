@@ -5,8 +5,8 @@ from functools import lru_cache
 
 @lru_cache(maxsize=1)
 def load_config():
-    """Load configuration from config.json, set env vars, then allow env overrides"""
-    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config.json')
+    """Load configuration from config/config.json, set env vars, then allow env overrides"""
+    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', 'config.json')
     config = {}
     try:
         with open(config_path, 'r') as f:
