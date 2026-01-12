@@ -2169,7 +2169,7 @@ def music_next_artist_image():
 
         req = urllib.request.Request(wiki_search_url, headers={'User-Agent': 'Skye/1.0'})
         with urllib.request.urlopen(req, timeout=5) as response:
-            wiki_data = json_lib.loads(response.read().decode('utf-8'))
+            wiki_data = json.loads(response.read().decode('utf-8'))
             pages = wiki_data.get('query', {}).get('pages', {})
 
             for page_id, page in pages.items():
@@ -2181,7 +2181,7 @@ def music_next_artist_image():
         req = urllib.request.Request(search_url, headers={'User-Agent': 'Skye/1.0'})
 
         with urllib.request.urlopen(req, timeout=5) as response:
-            search_data = json_lib.loads(response.read().decode('utf-8'))
+            search_data = json.loads(response.read().decode('utf-8'))
 
             if len(search_data) > 1 and len(search_data[1]) > 0:
                 # Get the first search result title
@@ -2193,7 +2193,7 @@ def music_next_artist_image():
                 req = urllib.request.Request(image_url, headers={'User-Agent': 'Skye/1.0'})
 
                 with urllib.request.urlopen(req, timeout=5) as img_response:
-                    img_data = json_lib.loads(img_response.read().decode('utf-8'))
+                    img_data = json.loads(img_response.read().decode('utf-8'))
                     pages = img_data.get('query', {}).get('pages', {})
 
                     for page_id, page in pages.items():
