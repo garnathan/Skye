@@ -546,7 +546,7 @@ def download_youtube_audio():
         with tempfile.TemporaryDirectory() as temp_dir:
             # Use the existing youtube_audio_downloader.py script
             script_path = os.path.join(
-                os.path.dirname(__file__), '..', 'youtube_audio_downloader.py'
+                os.path.dirname(__file__), '..', 'scripts', 'youtube_audio_downloader.py'
             )
 
             if not os.path.exists(script_path):

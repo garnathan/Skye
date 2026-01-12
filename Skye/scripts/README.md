@@ -36,6 +36,16 @@ This directory contains all startup and utility scripts for the Skye application
   - Creates `.env` from template
   - Starts the keep-alive monitor
 
+### Utility Scripts
+
+- **`youtube_audio_downloader.py`** - Download YouTube videos as MP3 audio
+  ```bash
+  python3 scripts/youtube_audio_downloader.py <youtube_url>
+  ```
+  - Downloads best quality audio from YouTube
+  - Converts to MP3 (320kbps)
+  - Used by the YouTube playlist copier feature
+
 ## Usage
 
 ### Quick Start (Recommended)
