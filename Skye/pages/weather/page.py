@@ -13,9 +13,15 @@ def get_content():
                 <div class="weather-icon-large" id="currentIcon">
                     <i class="fas fa-spinner fa-spin"></i>
                 </div>
-                <div class="weather-temp">
-                    <div class="temp-value" id="currentTemp">--</div>
-                    <div class="temp-unit">°C</div>
+                <div class="weather-widget-group">
+                    <div class="weather-temp">
+                        <div class="temp-value" id="currentTemp">--</div>
+                        <div class="temp-unit">°C</div>
+                    </div>
+                    <div class="weather-feels-like">
+                        <div class="feels-like-value" id="feelsLikeValue">--</div>
+                        <div class="feels-like-label">Feels like</div>
+                    </div>
                 </div>
                 <div class="weather-wind">
                     <div class="wind-arrow" id="windArrow">
@@ -24,7 +30,6 @@ def get_content():
                     <div class="wind-speed-value" id="windSpeedValue">--</div>
                     <div class="wind-unit">km/h</div>
                 </div>
-                <div class="feels-like" id="feelsLike">Feels like --°C</div>
                 <div class="weather-description" id="weatherDescription">Loading...</div>
             </div>
 
@@ -124,6 +129,12 @@ def get_content():
         font-size: 6rem;
     }
 
+    .weather-widget-group {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
     .weather-temp,
     .weather-wind {
         display: flex;
@@ -137,9 +148,27 @@ def get_content():
         backdrop-filter: blur(10px);
     }
 
+    .weather-feels-like {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 180px;
+        padding: 1rem 1.5rem;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+
     .temp-value,
     .wind-speed-value {
         font-size: 5rem;
+        font-weight: bold;
+        line-height: 1;
+    }
+
+    .feels-like-value {
+        font-size: 2.5rem;
         font-weight: bold;
         line-height: 1;
     }
@@ -151,19 +180,19 @@ def get_content():
         opacity: 0.8;
     }
 
+    .feels-like-label {
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+        opacity: 0.7;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
     .wind-arrow {
         font-size: 4rem;
         margin-bottom: 1rem;
         transition: transform 0.5s ease;
         filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    }
-
-    .feels-like {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        margin-top: 0.5rem;
-        text-align: center;
-        width: 100%;
     }
 
     .weather-description {
@@ -440,8 +469,13 @@ def get_content():
             font-size: 3.5rem;
         }
 
+        .feels-like-value {
+            font-size: 2rem;
+        }
+
         .weather-temp,
-        .weather-wind {
+        .weather-wind,
+        .weather-feels-like {
             min-width: 140px;
             padding: 1rem;
         }
@@ -607,7 +641,7 @@ def get_content():
 
         // Calculate and display feels like temperature
         const feelsLike = calculateFeelsLike(current.temperature, current.windSpeed, current.humidity);
-        document.getElementById('feelsLike').textContent = `Feels like ${Math.round(feelsLike)}°C`;
+        document.getElementById('feelsLikeValue').textContent = `${Math.round(feelsLike)}°C`;
 
         document.getElementById('weatherDescription').textContent = current.description || 'Current conditions';
         document.getElementById('humidity').textContent = `${current.humidity}%`;
