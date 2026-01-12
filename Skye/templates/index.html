@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skye</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-dog"></i> Skye</h1>
+            <button id="restartBtn" class="restart-btn" title="Restart Skye">
+                <i class="fas fa-redo"></i>
+            </button>
+        </header>
+        
+        <nav class="tabs">
+            {% for page in pages %}
+            <button class="tab-button" data-page="{{ page.id }}">
+                <i class="{{ page.icon }}"></i>
+                {{ page.name }}
+            </button>
+            {% endfor %}
+        </nav>
+        
+        <main class="content">
+            <div id="page-content">
+                <div class="welcome">
+                    <div class="page-grid">
+                        {% for page in pages %}
+                        <div class="page-card" data-page="{{ page.id }}">
+                            <i class="{{ page.icon }}"></i>
+                            <h3>{{ page.name }}</h3>
+                            <p>{{ page.description }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

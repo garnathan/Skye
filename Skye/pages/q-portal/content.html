@@ -1,0 +1,271 @@
+<div class="q-portal">
+    <h2><i class="fas fa-robot"></i> Amazon Q Portal</h2>
+    
+    <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot-message">
+                <i class="fas fa-robot"></i>
+                <div class="message-content">
+                    <p>Hello! I'm Amazon Q. How can I help you today?</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <div class="input-group">
+                <input type="text" id="chatInput" placeholder="Ask Amazon Q anything..." />
+                <button id="sendButton"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.q-portal {
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    background: #f8f9fa;
+}
+
+.message {
+    display: flex;
+    margin-bottom: 1rem;
+    align-items: flex-start;
+}
+
+.message i {
+    margin-right: 0.5rem;
+    margin-top: 0.25rem;
+    font-size: 1.2rem;
+}
+
+.bot-message i {
+    color: #667eea;
+}
+
+.user-message {
+    flex-direction: row-reverse;
+}
+
+.user-message i {
+    margin-left: 0.5rem;
+    margin-right: 0;
+    color: #28a745;
+}
+
+.message-content {
+    background: white;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    max-width: 70%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.user-message .message-content {
+    background: #667eea;
+    color: white;
+}
+
+.chat-input-container {
+    padding: 1rem;
+    background: white;
+    border-top: 1px solid #ddd;
+}
+
+.input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+#chatInput {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+}
+
+#chatInput:focus {
+    border-color: #667eea;
+}
+
+#sendButton {
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#sendButton:hover {
+    background: #5a6fd8;
+}
+
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    color: #666;
+    font-style: italic;
+}
+
+.typing-dots {
+    display: inline-block;
+    margin-left: 0.5rem;
+}
+
+.typing-dots span {
+    animation: typing 1.4s infinite;
+    animation-fill-mode: both;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-10px);
+    }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/ansi_up@5.2.1/ansi_up.min.js"></script>
+<script>
+class QPortal {
+    constructor() {
+        this.chatMessages = document.getElementById('chatMessages');
+        this.chatInput = document.getElementById('chatInput');
+        this.sendButton = document.getElementById('sendButton');
+        this.init();
+    }
+
+    init() {
+        this.sendButton.addEventListener('click', () => this.sendMessage());
+        this.chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.sendMessage();
+        });
+    }
+
+    sendMessage() {
+        const message = this.chatInput.value.trim();
+        if (!message) return;
+
+        this.addMessage(message, 'user');
+        this.chatInput.value = '';
+        
+        this.showTyping();
+        this.handleQResponse(message);
+    }
+
+    addMessage(content, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}-message`;
+        
+        const icon = type === 'user' ? 'fas fa-user' : 'fas fa-robot';
+        
+        // Convert ANSI codes to HTML for bot messages
+        let processedContent = content;
+        if (type === 'bot') {
+            try {
+                const ansi = new AnsiUp();
+                processedContent = ansi.ansi_to_html(content);
+            } catch (e) {
+                // Fallback: strip ANSI codes if library fails
+                processedContent = content.replace(/\x1b\[[0-9;]*m/g, '');
+            }
+        } else {
+            // Escape HTML for user messages
+            processedContent = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+        
+        messageDiv.innerHTML = `
+            <i class="${icon}"></i>
+            <div class="message-content">
+                <div>${processedContent}</div>
+            </div>
+        `;
+        
+        this.chatMessages.appendChild(messageDiv);
+        this.scrollToBottom();
+    }
+
+    showTyping() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'message bot-message typing-indicator';
+        typingDiv.id = 'typing';
+        typingDiv.innerHTML = `
+            <i class="fas fa-robot"></i>
+            <div class="message-content">
+                <span>Q is thinking</span>
+                <span class="typing-dots">
+                    <span>.</span><span>.</span><span>.</span>
+                </span>
+            </div>
+        `;
+        
+        this.chatMessages.appendChild(typingDiv);
+        this.scrollToBottom();
+    }
+
+    async handleQResponse(userMessage) {
+        document.getElementById('typing')?.remove();
+        
+        try {
+            const response = await fetch('/api/q/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: userMessage })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                this.addMessage(data.response, 'bot');
+            } else {
+                this.addMessage(`Error: ${data.error}`, 'bot');
+            }
+        } catch (error) {
+            this.addMessage(`Connection error: ${error.message}`, 'bot');
+        }
+    }
+
+    scrollToBottom() {
+        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    }
+}
+
+// Initialize Q Portal when the page loads
+new QPortal();
+</script>

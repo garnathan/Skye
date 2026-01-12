@@ -1,0 +1,63 @@
+<!-- YouTube Playlist Copier Modal -->
+<div id="playlistModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fab fa-youtube"></i> YouTube Playlist Copier</h3>
+            <span class="close" onclick="document.getElementById('playlistModal').style.display='none'">&times;</span>
+        </div>
+        
+        <div class="modal-body">
+            <div class="step-container">
+                <div class="step active" id="step1">
+                    <h4>Step 1: Source Account</h4>
+                    <label for="sourceChannel">Source YouTube Channel/Handle:</label>
+                    <input type="text" id="sourceChannel" placeholder="@username or channel name" />
+                    <button onclick="loadPlaylists()" id="loadBtn">Load Playlists</button>
+                    <div id="loadingMsg" class="loading hidden">Loading playlists...</div>
+                </div>
+                
+                <div class="step hidden" id="step2">
+                    <h4>Step 2: Select Playlists</h4>
+                    <div class="playlist-controls">
+                        <button onclick="goBackToStep1()" class="back-btn">← Back</button>
+                        <div class="selection-controls">
+                            <button onclick="selectAll()">Select All</button>
+                            <button onclick="selectNone()">Select None</button>
+                        </div>
+                    </div>
+                    <div id="playlistList" class="playlist-list"></div>
+                    <button onclick="showStep3()" class="next-btn">Next: Choose Destination</button>
+                </div>
+                
+                <div class="step hidden" id="step3">
+                    <h4>Step 3: Authorize Accounts</h4>
+                    <div class="auth-section">
+                        <div class="auth-account">
+                            <h5>Source Account (to read playlists)</h5>
+                            <button id="authorizeSourceBtn" onclick="authorizeYouTube('source')" class="btn btn-primary">Authorize Source Account</button>
+                            <div id="sourceAuthStatus"></div>
+                        </div>
+                        <div class="auth-account">
+                            <h5>Destination Account (to create playlists)</h5>
+                            <button id="authorizeDestBtn" onclick="authorizeYouTube('destination')" class="btn btn-primary">Authorize Destination Account</button>
+                            <div id="destAuthStatus"></div>
+                        </div>
+                    </div>
+                    <div class="copy-options">
+                        <label>
+                            <input type="checkbox" id="copyPrivate" checked> Copy private playlists as private
+                        </label>
+                        <label>
+                            <input type="checkbox" id="copyDescriptions" checked> Copy playlist descriptions
+                        </label>
+                    </div>
+                    <button id="copyBtn" onclick="copyPlaylists()" class="copy-btn" disabled>Copy Selected Playlists</button>
+                    <div id="copyProgress" class="progress hidden">
+                        <div class="progress-bar"></div>
+                        <div class="progress-text">Copying playlists...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

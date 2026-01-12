@@ -1,0 +1,69 @@
+<div class="tools-page">
+    <h2><i class="fas fa-tools"></i> Development Tools</h2>
+    
+    <div class="tools-grid">
+        <div class="tool-card">
+            <i class="fas fa-code"></i>
+            <h3>Code Formatter</h3>
+            <p>Format and beautify your code</p>
+            <button onclick="alert('Code formatter would open here')">Open Tool</button>
+        </div>
+        
+        <div class="tool-card">
+            <i class="fas fa-database"></i>
+            <h3>Database Query</h3>
+            <p>Execute database queries</p>
+            <button onclick="alert('Database tool would open here')">Open Tool</button>
+        </div>
+        
+        <div class="tool-card">
+            <i class="fas fa-chart-line"></i>
+            <h3>Performance Monitor</h3>
+            <p>Monitor system performance</p>
+            <button onclick="alert('Performance monitor would open here')">Open Tool</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.tool-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.tool-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.tool-card i {
+    font-size: 2rem;
+    color: #667eea;
+    margin-bottom: 1rem;
+}
+
+.tool-card button {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+.tool-card button:hover {
+    background: #5a6fd8;
+}
+</style>
