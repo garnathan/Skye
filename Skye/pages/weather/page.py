@@ -17,6 +17,13 @@ def get_content():
                     <div class="temp-value" id="currentTemp">--</div>
                     <div class="temp-unit">°C</div>
                 </div>
+                <div class="weather-wind">
+                    <div class="wind-arrow" id="windArrow">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="wind-speed-value" id="windSpeedValue">--</div>
+                    <div class="wind-unit">km/h</div>
+                </div>
                 <div class="feels-like" id="feelsLike">Feels like --°C</div>
                 <div class="weather-description" id="weatherDescription">Loading...</div>
             </div>
@@ -27,20 +34,6 @@ def get_content():
                     <div class="detail-content">
                         <span class="detail-label">Humidity</span>
                         <span class="detail-value" id="humidity">--%</span>
-                    </div>
-                </div>
-                <div class="detail-item">
-                    <i class="fas fa-wind"></i>
-                    <div class="detail-content">
-                        <span class="detail-label">Wind Speed</span>
-                        <span class="detail-value" id="windSpeed">-- km/h</span>
-                    </div>
-                </div>
-                <div class="detail-item">
-                    <i class="fas fa-compass"></i>
-                    <div class="detail-content">
-                        <span class="detail-label">Wind Direction</span>
-                        <span class="detail-value" id="windDirection">--</span>
                     </div>
                 </div>
                 <div class="detail-item">
@@ -145,6 +138,32 @@ def get_content():
     .temp-unit {
         font-size: 2rem;
         margin-top: 0.5rem;
+        opacity: 0.8;
+    }
+
+    .weather-wind {
+        display: flex;
+        align-items: flex-start;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .wind-arrow {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+        transition: transform 0.5s ease;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+
+    .wind-speed-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        line-height: 1;
+    }
+
+    .wind-unit {
+        font-size: 1rem;
+        margin-top: 0.25rem;
         opacity: 0.8;
     }
 
@@ -429,6 +448,14 @@ def get_content():
             font-size: 3.5rem;
         }
 
+        .wind-speed-value {
+            font-size: 2rem;
+        }
+
+        .wind-arrow {
+            font-size: 2.5rem;
+        }
+
         .weather-icon-large {
             font-size: 4rem;
         }
@@ -578,14 +605,18 @@ def get_content():
         document.getElementById('currentIcon').innerHTML = `<i class="fas ${iconClass}"></i>`;
         document.getElementById('currentTemp').textContent = Math.round(current.temperature);
 
+        // Update wind display with rotation
+        document.getElementById('windSpeedValue').textContent = Math.round(current.windSpeed);
+        const windArrow = document.getElementById('windArrow');
+        windArrow.style.transform = `rotate(${current.windDirection}deg)`;
+        windArrow.title = `Wind from ${getWindDirection(current.windDirection)}`;
+
         // Calculate and display feels like temperature
         const feelsLike = calculateFeelsLike(current.temperature, current.windSpeed, current.humidity);
         document.getElementById('feelsLike').textContent = `Feels like ${Math.round(feelsLike)}°C`;
 
         document.getElementById('weatherDescription').textContent = current.description || 'Current conditions';
         document.getElementById('humidity').textContent = `${current.humidity}%`;
-        document.getElementById('windSpeed').textContent = `${Math.round(current.windSpeed)} km/h`;
-        document.getElementById('windDirection').textContent = getWindDirection(current.windDirection);
         document.getElementById('cloudCover').textContent = `${current.cloudCover}%`;
 
         // Display sunset time from API
