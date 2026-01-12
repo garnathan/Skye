@@ -1,24 +1,10 @@
 #!/usr/bin/env python3
 # Standard library imports
 import os
-import sys
-import json
-import logging
-import subprocess
-import threading
 import importlib.util
-import urllib.request
-import urllib.parse
-from datetime import datetime, timedelta
-from collections import deque
-from urllib.parse import urlparse, parse_qs
-
-# Third-party imports
-import requests
-import google.generativeai as genai
 
 # Flask imports
-from flask import Flask, render_template, jsonify, request, Response, session
+from flask import Flask, render_template, jsonify, request
 
 # Load environment variables from .env file
 try:
@@ -129,24 +115,16 @@ def index():
 def favicon():
     return app.send_static_file('favicon.svg')
 
-# Pages routes moved to blueprints/pages.py
-
-# Gemini routes moved to blueprints/gemini.py
-
-# Dashboard routes moved to blueprints/dashboard.py
-# VRT calculator route moved to blueprints/tools.py
-
-# YouTube audio download route moved to blueprints/youtube.py
-
-# Music Next routes moved to blueprints/music_next.py
+# ============================================================================
+# All API routes have been moved to blueprints for better organization:
+# - blueprints/weather.py, logs.py, tools.py, pages.py
+# - blueprints/music_next.py, gemini.py, youtube.py, dashboard.py
+# ============================================================================
 
 @app.route('/api/restart', methods=['POST'])
 def restart_server():
     """Restart the Skye server"""
     try:
-        import os
-        import signal
-
         app.logger.warning("Server restart requested by user")
         # Send restart signal to keep_alive.py
         os.system('touch /tmp/skye_restart')
@@ -191,15 +169,16 @@ def vrt_calculator_standalone():
     
     return '<h1>VRT Calculator not found</h1>', 404
 
-# Page content route moved to blueprints/pages.py
 
-# Logs routes moved to blueprints/logs.py
+# ============================================================================
+# APPLICATION CONFIGURATION
+# ============================================================================
+
+# Configure session for OAuth (YouTube playlist copying)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'your-secret-key-change-this-in-production')
 
 # Log application startup
 app.logger.info("Skye application started")
-
-# Configure session for OAuth
-app.secret_key = 'your-secret-key-change-this-in-production'
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001, use_reloader=True, reloader_type='stat')
