@@ -440,14 +440,29 @@ def get_content():
     const KILLINEY_LAT = 53.2631;
     const KILLINEY_LONG = -6.1083;
 
-    function calculateSunsetHour(date) {
-        // Calculate sunset hour for the given date
-        const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
-        // Sunset varies from ~16:00 in winter to ~21:45 in summer for Dublin
-        const amplitude = 2.75; // hours variation
-        const offset = 18.5; // average sunset hour
-        const sunsetHour = offset + amplitude * Math.sin((dayOfYear - 80) * 2 * Math.PI / 365);
-        return sunsetHour;
+    let cachedSunsetTime = null;
+    let cachedSunriseTime = null;
+
+    async function fetchSunTimes() {
+        try {
+            const response = await fetch(`/api/sun-times?lat=${KILLINEY_LAT}&lng=${KILLINEY_LONG}`);
+            const data = await response.json();
+            if (data.sunset && data.sunrise) {
+                cachedSunsetTime = data.sunset;
+                cachedSunriseTime = data.sunrise;
+                return data;
+            }
+        } catch (error) {
+            console.error('Failed to fetch sun times:', error);
+        }
+        return null;
+    }
+
+    function calculateSunsetHour(sunsetTime) {
+        // Convert sunset time string (HH:MM) to decimal hour
+        if (!sunsetTime) return 18.5; // Fallback to average
+        const [hours, minutes] = sunsetTime.split(':').map(Number);
+        return hours + minutes / 60;
     }
 
     function isNighttime(timestamp) {
@@ -460,9 +475,9 @@ def get_content():
         const minute = date.getMinutes();
         const currentTime = hour + minute / 60;
 
-        // Calculate sunset time for this date
-        const sunsetHour = calculateSunsetHour(date);
-        const sunriseHour = 6; // Approximate sunrise at 6 AM
+        // Use cached sunset/sunrise times
+        const sunsetHour = calculateSunsetHour(cachedSunsetTime);
+        const sunriseHour = cachedSunriseTime ? calculateSunsetHour(cachedSunriseTime) : 6;
 
         // Nighttime is after sunset or before sunrise
         return currentTime >= sunsetHour || currentTime < sunriseHour;
@@ -501,15 +516,20 @@ def get_content():
 
     async function fetchWeatherData() {
         try {
-            const response = await fetch(`/api/weather?lat=${KILLINEY_LAT}&long=${KILLINEY_LONG}`);
-            const data = await response.json();
+            // Fetch both weather and sun times in parallel
+            const [weatherResponse, sunData] = await Promise.all([
+                fetch(`/api/weather?lat=${KILLINEY_LAT}&long=${KILLINEY_LONG}`),
+                fetchSunTimes()
+            ]);
+
+            const data = await weatherResponse.json();
 
             if (data.error) {
                 console.error('Weather API error:', data.error);
                 return;
             }
 
-            updateCurrentWeather(data.current);
+            updateCurrentWeather(data.current, sunData);
             updateHourlyForecast(data.hourly);
             updateWeeklyForecast(data.hourly);
 
@@ -546,27 +566,7 @@ def get_content():
         return temp;
     }
 
-    function calculateSunset(lat, date) {
-        // Simple sunset calculation for Killiney coordinates
-        const day = date.getDate();
-        const month = date.getMonth() + 1;
-
-        // Approximate sunset times for Killiney (changes throughout year)
-        // This is a simplified calculation
-        const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
-
-        // Sunset varies from ~16:00 in winter to ~21:45 in summer for Dublin
-        const amplitude = 2.75; // hours variation
-        const offset = 18.5; // average sunset hour
-        const sunsetHour = offset + amplitude * Math.sin((dayOfYear - 80) * 2 * Math.PI / 365);
-
-        const hour = Math.floor(sunsetHour);
-        const minute = Math.floor((sunsetHour - hour) * 60);
-
-        return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-    }
-
-    function updateCurrentWeather(current) {
+    function updateCurrentWeather(current, sunData) {
         const iconClass = getWeatherIcon(current.symbol, current.time);
         document.getElementById('currentIcon').innerHTML = `<i class="fas ${iconClass}"></i>`;
         document.getElementById('currentTemp').textContent = Math.round(current.temperature);
@@ -581,9 +581,12 @@ def get_content():
         document.getElementById('windDirection').textContent = getWindDirection(current.windDirection);
         document.getElementById('cloudCover').textContent = `${current.cloudCover}%`;
 
-        // Calculate and display sunset time
-        const sunsetTime = calculateSunset(53.2631, new Date());
-        document.getElementById('sunset').textContent = sunsetTime;
+        // Display sunset time from API
+        if (sunData && sunData.sunset) {
+            document.getElementById('sunset').textContent = sunData.sunset;
+        } else {
+            document.getElementById('sunset').textContent = '--:--';
+        }
     }
 
     function updateHourlyForecast(hourly) {

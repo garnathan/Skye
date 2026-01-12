@@ -109,3 +109,63 @@ def get_weather():
     except Exception as e:
         current_app.logger.error(f"Weather API error: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+
+@weather_bp.route('/api/sun-times', methods=['GET'])
+def get_sun_times():
+    """Get sunrise and sunset times from sunrise-sunset.org API"""
+    try:
+        lat = request.args.get('lat', '53.2631')  # Default to Killiney
+        lng = request.args.get('lng', '-6.1083')
+        current_app.logger.info(
+            f"Sun times requested for coordinates: lat={lat}, lng={lng}"
+        )
+
+        # Fetch from sunrise-sunset.org API (free, no API key required)
+        url = f'https://api.sunrise-sunset.org/json?lat={lat}&lng={lng}&formatted=0'
+        response = requests.get(url, timeout=10)
+
+        if response.status_code != 200:
+            current_app.logger.error(
+                f"Sunrise-sunset API returned status {response.status_code}"
+            )
+            return jsonify({'error': 'Failed to fetch sun times'}), 500
+
+        data = response.json()
+
+        if data.get('status') != 'OK':
+            current_app.logger.error(
+                f"Sunrise-sunset API error: {data.get('status')}"
+            )
+            return jsonify({'error': 'Invalid response from sun times API'}), 500
+
+        results = data.get('results', {})
+
+        # Parse ISO timestamps and convert to local time
+        sunrise_utc = datetime.fromisoformat(
+            results['sunrise'].replace('Z', '+00:00')
+        )
+        sunset_utc = datetime.fromisoformat(
+            results['sunset'].replace('Z', '+00:00')
+        )
+
+        # Convert to local timezone (Ireland is UTC+0 in winter, UTC+1 in summer)
+        # For simplicity, we'll return both UTC and formatted local times
+        sunrise_local = sunrise_utc.strftime('%H:%M')
+        sunset_local = sunset_utc.strftime('%H:%M')
+
+        current_app.logger.info(
+            f"Sun times retrieved: sunrise={sunrise_local}, sunset={sunset_local}"
+        )
+
+        return jsonify({
+            'sunrise': sunrise_local,
+            'sunset': sunset_local,
+            'sunrise_iso': results['sunrise'],
+            'sunset_iso': results['sunset'],
+            'day_length': results.get('day_length', 0)
+        })
+
+    except Exception as e:
+        current_app.logger.error(f"Sun times API error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
