@@ -114,7 +114,7 @@
         "Krewella",
         "Sticky Fingers"
       ],
-      "current_index": 3
+      "current_index": 4
     },
     "london grammar": {
       "search_artist": "London Grammar",
@@ -147,7 +147,7 @@
         "Bon Iver",
         "Amber Run",
         "Bears Den",
-        "Susanne Sundfør",
+        "Susanne Sundf\u00f8r",
         "The avener",
         "Sam Smith",
         "Rudimental",
@@ -183,7 +183,7 @@
         "Bon Iver",
         "Amber Run",
         "Bears Den",
-        "Susanne Sundfør",
+        "Susanne Sundf\u00f8r",
         "The avener",
         "Sam Smith",
         "Rudimental",
