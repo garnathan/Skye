@@ -124,47 +124,38 @@ def get_content():
         font-size: 6rem;
     }
 
-    .weather-temp {
+    .weather-temp,
+    .weather-wind {
         display: flex;
-        align-items: flex-start;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 180px;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
     }
 
-    .temp-value {
+    .temp-value,
+    .wind-speed-value {
         font-size: 5rem;
         font-weight: bold;
         line-height: 1;
     }
 
-    .temp-unit {
-        font-size: 2rem;
+    .temp-unit,
+    .wind-unit {
+        font-size: 1.5rem;
         margin-top: 0.5rem;
         opacity: 0.8;
     }
 
-    .weather-wind {
-        display: flex;
-        align-items: flex-start;
-        flex-direction: column;
-        position: relative;
-    }
-
     .wind-arrow {
-        font-size: 3rem;
-        margin-bottom: 0.5rem;
+        font-size: 4rem;
+        margin-bottom: 1rem;
         transition: transform 0.5s ease;
         filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    }
-
-    .wind-speed-value {
-        font-size: 2.5rem;
-        font-weight: bold;
-        line-height: 1;
-    }
-
-    .wind-unit {
-        font-size: 1rem;
-        margin-top: 0.25rem;
-        opacity: 0.8;
     }
 
     .feels-like {
@@ -444,16 +435,19 @@ def get_content():
             gap: 1rem;
         }
 
-        .temp-value {
+        .temp-value,
+        .wind-speed-value {
             font-size: 3.5rem;
         }
 
-        .wind-speed-value {
-            font-size: 2rem;
+        .weather-temp,
+        .weather-wind {
+            min-width: 140px;
+            padding: 1rem;
         }
 
         .wind-arrow {
-            font-size: 2.5rem;
+            font-size: 3rem;
         }
 
         .weather-icon-large {
