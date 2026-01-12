@@ -148,21 +148,29 @@ def get_sun_times():
         sunset_utc = datetime.fromisoformat(
             results['sunset'].replace('Z', '+00:00')
         )
+        civil_twilight_end_utc = datetime.fromisoformat(
+            results['civil_twilight_end'].replace('Z', '+00:00')
+        )
 
         # Convert to local timezone (Ireland is UTC+0 in winter, UTC+1 in summer)
         # For simplicity, we'll return both UTC and formatted local times
         sunrise_local = sunrise_utc.strftime('%H:%M')
         sunset_local = sunset_utc.strftime('%H:%M')
+        civil_twilight_end_local = civil_twilight_end_utc.strftime('%H:%M')
 
         current_app.logger.info(
-            f"Sun times retrieved: sunrise={sunrise_local}, sunset={sunset_local}"
+            f"Sun times retrieved: sunrise={sunrise_local}, "
+            f"sunset={sunset_local}, "
+            f"civil_twilight_end={civil_twilight_end_local}"
         )
 
         return jsonify({
             'sunrise': sunrise_local,
             'sunset': sunset_local,
+            'civil_twilight_end': civil_twilight_end_local,
             'sunrise_iso': results['sunrise'],
             'sunset_iso': results['sunset'],
+            'civil_twilight_end_iso': results['civil_twilight_end'],
             'day_length': results.get('day_length', 0)
         })
 

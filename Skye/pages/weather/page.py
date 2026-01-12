@@ -57,6 +57,13 @@ def get_content():
                         <span class="detail-value" id="sunset">--:--</span>
                     </div>
                 </div>
+                <div class="detail-item">
+                    <i class="fas fa-lightbulb"></i>
+                    <div class="detail-content">
+                        <span class="detail-label">Usable Light</span>
+                        <span class="detail-value" id="usableLight">--:--</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -586,6 +593,13 @@ def get_content():
             document.getElementById('sunset').textContent = sunData.sunset;
         } else {
             document.getElementById('sunset').textContent = '--:--';
+        }
+
+        // Display usable light (civil twilight end) time from API
+        if (sunData && sunData.civil_twilight_end) {
+            document.getElementById('usableLight').textContent = sunData.civil_twilight_end;
+        } else {
+            document.getElementById('usableLight').textContent = '--:--';
         }
     }
 
