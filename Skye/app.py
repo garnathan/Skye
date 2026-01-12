@@ -20,7 +20,7 @@ app = Flask(__name__)
 # ============================================================================
 
 # Import logging system
-from logging_setup import setup_logging, log_storage, log_storage_lock
+from utils.logging_setup import setup_logging, log_storage, log_storage_lock
 setup_logging(app)
 
 # Import utilities

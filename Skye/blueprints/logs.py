@@ -4,7 +4,7 @@ Handles log viewing, filtering, and clearing
 """
 from datetime import datetime, timedelta
 from flask import Blueprint, jsonify, request, current_app
-from logging_setup import log_storage, log_storage_lock
+from utils.logging_setup import log_storage, log_storage_lock
 
 logs_bp = Blueprint('logs', __name__)
 
