@@ -115,7 +115,7 @@ def get_content():
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 4rem;
+        gap: 6rem;
         margin-bottom: 2rem;
         flex-wrap: wrap;
     }
