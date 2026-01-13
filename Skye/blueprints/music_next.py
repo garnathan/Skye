@@ -12,10 +12,21 @@ import requests
 
 music_next_bp = Blueprint('music_next', __name__)
 
+MUSIC_CONFIG_PATH = os.path.join(os.path.dirname(__file__), '..', 'config', 'music_recommendations.json')
+DEFAULT_MUSIC_CONFIG = {'artists': {}, 'current_search': None}
+
 
 def get_config_path():
     """Get the path to music_recommendations.json"""
-    return os.path.join(os.path.dirname(__file__), '..', 'config', 'music_recommendations.json')
+    return MUSIC_CONFIG_PATH
+
+
+def ensure_music_config_exists():
+    """Create music_recommendations.json if it doesn't exist"""
+    if not os.path.exists(MUSIC_CONFIG_PATH):
+        os.makedirs(os.path.dirname(MUSIC_CONFIG_PATH), exist_ok=True)
+        with open(MUSIC_CONFIG_PATH, 'w') as f:
+            json.dump(DEFAULT_MUSIC_CONFIG, f, indent=2)
 
 
 @music_next_bp.route('/api/music-next/search', methods=['GET'])
@@ -68,12 +79,10 @@ def music_next_search():
 
         # Load or create music recommendations state
         config_path = get_config_path()
+        ensure_music_config_exists()
 
-        if os.path.exists(config_path):
-            with open(config_path, 'r') as f:
-                music_config = json.load(f)
-        else:
-            music_config = {'artists': {}}
+        with open(config_path, 'r') as f:
+            music_config = json.load(f)
 
         # Check if this is a re-search
         artist_key = artist.lower()
@@ -142,15 +151,13 @@ def music_next_listened():
             return jsonify({'error': 'Invalid request'}), 400
 
         config_path = get_config_path()
-
-        if not os.path.exists(config_path):
-            return jsonify({'error': 'No recommendation data found'}), 404
+        ensure_music_config_exists()
 
         with open(config_path, 'r') as f:
             music_config = json.load(f)
 
         artist_key = artist.lower()
-        if artist_key not in music_config['artists']:
+        if artist_key not in music_config.get('artists', {}):
             return jsonify({'error': 'Artist not found'}), 404
 
         artist_data = music_config['artists'][artist_key]
@@ -208,15 +215,13 @@ def music_next_skip():
             return jsonify({'error': 'Invalid request'}), 400
 
         config_path = get_config_path()
-
-        if not os.path.exists(config_path):
-            return jsonify({'error': 'No recommendation data found'}), 404
+        ensure_music_config_exists()
 
         with open(config_path, 'r') as f:
             music_config = json.load(f)
 
         artist_key = artist.lower()
-        if artist_key not in music_config['artists']:
+        if artist_key not in music_config.get('artists', {}):
             return jsonify({'error': 'Artist not found'}), 404
 
         artist_data = music_config['artists'][artist_key]
@@ -272,15 +277,13 @@ def music_next_back():
             return jsonify({'error': 'Invalid request'}), 400
 
         config_path = get_config_path()
-
-        if not os.path.exists(config_path):
-            return jsonify({'error': 'No recommendation data found'}), 404
+        ensure_music_config_exists()
 
         with open(config_path, 'r') as f:
             music_config = json.load(f)
 
         artist_key = artist.lower()
-        if artist_key not in music_config['artists']:
+        if artist_key not in music_config.get('artists', {}):
             return jsonify({'error': 'Artist not found'}), 404
 
         artist_data = music_config['artists'][artist_key]
@@ -323,9 +326,7 @@ def music_next_current():
     """Get current recommendation state"""
     try:
         config_path = get_config_path()
-
-        if not os.path.exists(config_path):
-            return jsonify({})
+        ensure_music_config_exists()
 
         with open(config_path, 'r') as f:
             music_config = json.load(f)
@@ -376,9 +377,7 @@ def music_next_history():
     """Get search history"""
     try:
         config_path = get_config_path()
-
-        if not os.path.exists(config_path):
-            return jsonify({'history': []})
+        ensure_music_config_exists()
 
         with open(config_path, 'r') as f:
             music_config = json.load(f)
