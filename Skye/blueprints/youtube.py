@@ -3,12 +3,12 @@ YouTube API blueprint
 Handles YouTube playlists, OAuth, and audio downloads
 """
 import os
-import subprocess
 import tempfile
 import base64
 from urllib.parse import urlparse
 from flask import Blueprint, jsonify, request, current_app, session
 import requests
+import yt_dlp
 from utils import load_config
 
 youtube_bp = Blueprint('youtube', __name__)
@@ -544,35 +544,33 @@ def download_youtube_audio():
 
         # Create a temporary directory for the download
         with tempfile.TemporaryDirectory() as temp_dir:
-            # Use the existing youtube_audio_downloader.py script
-            script_path = os.path.join(
-                os.path.dirname(__file__), '..', 'scripts', 'youtube_audio_downloader.py'
-            )
-
-            if not os.path.exists(script_path):
-                return jsonify({
-                    'error': 'YouTube downloader script not found'
-                }), 500
-
-            # Run the download script in the temp directory
             try:
-                result = subprocess.run(
-                    ['python3', script_path, url],
-                    cwd=temp_dir,
-                    capture_output=True,
-                    text=True,
-                    timeout=300  # 5 minute timeout
-                )
+                # Configure yt-dlp options
+                ydl_opts = {
+                    'format': 'bestaudio/best',
+                    'postprocessors': [{
+                        'key': 'FFmpegExtractAudio',
+                        'preferredcodec': 'mp3',
+                        'preferredquality': '320',
+                    }],
+                    'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
+                    'http_headers': {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                                      'AppleWebKit/537.36 (KHTML, like Gecko) '
+                                      'Chrome/91.0.4472.124 Safari/537.36'
+                    },
+                    'extractor_args': {
+                        'youtube': {
+                            'player_client': ['android', 'web']
+                        }
+                    },
+                    'quiet': True,
+                    'no_warnings': True,
+                }
 
-                if result.returncode != 0:
-                    # Check if it's actually an error or just warnings
-                    stderr_lower = result.stderr.lower() if result.stderr else ''
-                    if 'error:' in stderr_lower and 'unable to download' in stderr_lower:
-                        return jsonify({
-                            'error': f'Download failed: {result.stderr}'
-                        }), 500
-                    # If returncode != 0 but no critical error, continue to check
-                    # for MP3 file
+                # Download using yt-dlp library directly
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    ydl.download([url])
 
                 # Find the downloaded MP3 file
                 mp3_files = [f for f in os.listdir(temp_dir) if f.endswith('.mp3')]
@@ -603,12 +601,11 @@ def download_youtube_audio():
                     'originalFilename': mp3_file
                 })
 
-            except subprocess.TimeoutExpired:
-                current_app.logger.error("YouTube audio download timeout")
+            except yt_dlp.utils.DownloadError as e:
+                current_app.logger.error(f"YouTube download error: {str(e)}")
                 return jsonify({
-                    'error': 'Download timeout - the video may be too long '
-                    'or unavailable'
-                }), 408
+                    'error': f'Download failed: {str(e)}'
+                }), 500
             except Exception as e:
                 current_app.logger.error(f"YouTube download error: {str(e)}")
                 return jsonify({'error': f'Download error: {str(e)}'}), 500
