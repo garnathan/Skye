@@ -680,9 +680,11 @@ def get_content():
         document.getElementById('currentTemp').textContent = Math.round(current.temperature);
 
         // Update wind display with rotation
+        // Wind direction is meteorological (where wind comes FROM)
+        // Add 180° to point arrow where wind is blowing TO
         document.getElementById('windSpeedValue').textContent = `${Math.round(current.windSpeed)} km/h`;
         const windArrow = document.getElementById('windArrow');
-        windArrow.style.transform = `rotate(${current.windDirection}deg)`;
+        windArrow.style.transform = `rotate(${current.windDirection + 180}deg)`;
         windArrow.title = `Wind from ${getWindDirection(current.windDirection)}`;
 
         // Calculate and display feels like temperature
