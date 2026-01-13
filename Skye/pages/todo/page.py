@@ -171,30 +171,52 @@ def get_content():
     js_code = '''
         <script>
         let todos = [];
-        
-        function loadTodos() {
-            const saved = localStorage.getItem('skyeTodos');
-            todos = saved ? JSON.parse(saved) : [];
-            renderTodos();
-        }
-        
-        function loadNotes() {
-            const saved = localStorage.getItem('skyeNotes');
-            const notesArea = document.getElementById('notesArea');
-            if (notesArea && saved) {
-                notesArea.value = saved;
+        let notes = '';
+
+        async function loadTodos() {
+            try {
+                const response = await fetch('/api/todos');
+                const data = await response.json();
+                todos = data.todos || [];
+                notes = data.notes || '';
+                renderTodos();
+                const notesArea = document.getElementById('notesArea');
+                if (notesArea) {
+                    notesArea.value = notes;
+                }
+            } catch (error) {
+                console.error('Failed to load todos:', error);
+                todos = [];
+                renderTodos();
             }
         }
-        
-        function saveNotes() {
+
+        function loadNotes() {
+            // Notes are loaded with todos
+        }
+
+        async function saveNotes() {
             const notesArea = document.getElementById('notesArea');
             if (notesArea) {
-                localStorage.setItem('skyeNotes', notesArea.value);
+                notes = notesArea.value;
+                await saveData();
             }
         }
-        
-        function saveTodos() {
-            localStorage.setItem('skyeTodos', JSON.stringify(todos));
+
+        async function saveTodos() {
+            await saveData();
+        }
+
+        async function saveData() {
+            try {
+                await fetch('/api/todos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ todos, notes })
+                });
+            } catch (error) {
+                console.error('Failed to save todos:', error);
+            }
         }
         
         function renderTodos() {
