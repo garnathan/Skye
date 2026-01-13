@@ -5,6 +5,14 @@ import requests
 import os
 import sys
 
+# Force unbuffered output for logging
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', buffering=1)
+sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', buffering=1)
+
+# Get the Skye root directory (parent of scripts directory)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SKYE_DIR = os.path.dirname(SCRIPT_DIR)
+
 def is_responding():
     try:
         return requests.get('http://localhost:5001', timeout=3).status_code == 200
@@ -12,10 +20,16 @@ def is_responding():
         return False
 
 def restart_skye():
-    subprocess.run('pkill -f "python.*app.py"', shell=True, capture_output=True)
-    time.sleep(1)
-    subprocess.Popen(['python3', 'app.py'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    print(f"[{time.strftime('%H:%M:%S')}] Restarted Skye")
+    try:
+        # Kill existing process
+        subprocess.run('pkill -f "python.*app.py"', shell=True, capture_output=True)
+        time.sleep(1)
+
+        # Start app.py from the Skye root directory
+        subprocess.Popen(['python3', 'app.py'], cwd=SKYE_DIR, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        print(f"[{time.strftime('%H:%M:%S')}] Restarted Skye from {SKYE_DIR}")
+    except Exception as e:
+        print(f"[{time.strftime('%H:%M:%S')}] Failed to restart Skye: {e}")
 
 print("Skye monitor started (checking every 30s)")
 
