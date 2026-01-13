@@ -39,6 +39,7 @@ from blueprints.music_next import music_next_bp
 from blueprints.gemini import gemini_bp
 from blueprints.youtube import youtube_bp
 from blueprints.dashboard import dashboard_bp
+from blueprints.todo import todo_bp
 
 app.register_blueprint(weather_bp)
 app.register_blueprint(logs_bp)
@@ -48,6 +49,7 @@ app.register_blueprint(music_next_bp)
 app.register_blueprint(gemini_bp)
 app.register_blueprint(youtube_bp)
 app.register_blueprint(dashboard_bp)
+app.register_blueprint(todo_bp)
 
 def discover_pages():
     """Automatically discover pages from the pages directory"""
