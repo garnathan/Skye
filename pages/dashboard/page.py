@@ -291,6 +291,7 @@ def get_content():
     js_code = '''
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
+        (function() {
         // Portfolio configuration from config file
         const PORTFOLIO_CONFIG = {
             amznShares: ''' + str(amzn_shares) + ''',
@@ -652,9 +653,12 @@ def get_content():
             }
         }
         
-;
-        
-        setTimeout(() => {
+
+        // Auto-refresh interval (60 seconds for prices)
+        const AUTO_REFRESH_INTERVAL = 60000;
+
+        // Wait for Chart.js to be available before initializing
+        function initDashboard() {
             fetchCurrentPrices();
             fetchStockData('1y');
             fetchPortfolioData('1y');
@@ -672,7 +676,35 @@ def get_content():
             setupPeriodSelector('orclPeriodSelect', fetchOrclData);
             setupPeriodSelector('xrpPeriodSelect', fetchXrpData);
             setupPeriodSelector('goldPeriodSelect', fetchGoldData);
-        }, 100);
+
+            // Register auto-refresh for prices (updates every 60 seconds)
+            if (window.autoRefresh) {
+                window.autoRefresh.register('dashboard-prices', () => {
+                    console.log('Auto-refreshing dashboard prices...');
+                    fetchCurrentPrices();
+                }, AUTO_REFRESH_INTERVAL);
+            }
+        }
+
+        // Check if Chart.js is loaded, retry until available
+        function waitForChartJs(callback, maxAttempts = 50) {
+            let attempts = 0;
+            const check = () => {
+                attempts++;
+                if (typeof Chart !== 'undefined') {
+                    console.log('Chart.js ready, initializing dashboard...');
+                    callback();
+                } else if (attempts < maxAttempts) {
+                    setTimeout(check, 100);
+                } else {
+                    console.error('Chart.js failed to load');
+                }
+            };
+            check();
+        }
+
+        waitForChartJs(initDashboard);
+        })();
         </script>
     '''
     

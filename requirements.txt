@@ -1,4 +1,5 @@
 Flask
+Flask-Caching
 requests
 yt-dlp
 google-generativeai

@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # Standard library imports
 import os
+import signal
+import sys
 import importlib.util
+import atexit
 
 # Flask imports
 from flask import Flask, render_template, jsonify, request
@@ -25,6 +28,12 @@ setup_logging(app)
 
 # Import utilities
 from utils import load_config, get_config_value, handle_api_errors, require_config_key
+from utils.cache import init_cache
+from utils.circuit_breaker import circuit_registry
+from datetime import datetime
+
+# Initialize cache
+init_cache(app)
 
 # ============================================================================
 # BLUEPRINTS
@@ -117,6 +126,29 @@ def index():
 def favicon():
     return app.send_static_file('favicon.svg')
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint for monitoring"""
+    services = circuit_registry.get_all_status()
+    all_healthy = all(s.get('healthy', True) for s in services.values())
+
+    return jsonify({
+        'status': 'healthy' if all_healthy else 'degraded',
+        'timestamp': datetime.utcnow().isoformat() + 'Z',
+        'services': services
+    }), 200 if all_healthy else 503
+
+@app.route('/api/readme')
+def get_readme():
+    """Get README content for help modal"""
+    readme_path = os.path.join(os.path.dirname(__file__), 'README.md')
+    try:
+        with open(readme_path, 'r') as f:
+            content = f.read()
+        return jsonify({'content': content})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # ============================================================================
 # All API routes have been moved to blueprints for better organization:
 # - blueprints/weather.py, logs.py, tools.py, pages.py
@@ -178,6 +210,45 @@ def vrt_calculator_standalone():
 
 # Configure session for OAuth (YouTube playlist copying)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'your-secret-key-change-this-in-production')
+
+# ============================================================================
+# GRACEFUL SHUTDOWN HANDLING
+# ============================================================================
+
+shutdown_in_progress = False
+
+def graceful_shutdown(signum=None, frame=None):
+    """Handle graceful shutdown on SIGTERM/SIGINT"""
+    global shutdown_in_progress
+    if shutdown_in_progress:
+        return
+    shutdown_in_progress = True
+
+    app.logger.info(f"Shutdown signal received (signal: {signum}). Cleaning up...")
+
+    # Clear caches
+    try:
+        from utils.cache import cache
+        cache.clear()
+        app.logger.info("Cache cleared")
+    except Exception as e:
+        app.logger.warning(f"Failed to clear cache: {e}")
+
+    # Reset circuit breakers
+    try:
+        for name, breaker in circuit_registry._breakers.items():
+            breaker.reset()
+        app.logger.info("Circuit breakers reset")
+    except Exception as e:
+        app.logger.warning(f"Failed to reset circuit breakers: {e}")
+
+    app.logger.info("Skye shutdown complete")
+    sys.exit(0)
+
+# Register shutdown handlers
+signal.signal(signal.SIGTERM, graceful_shutdown)
+signal.signal(signal.SIGINT, graceful_shutdown)
+atexit.register(graceful_shutdown)
 
 # Log application startup
 app.logger.info("Skye application started")

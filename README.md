@@ -1,172 +1,106 @@
 # Skye
 
-A modular web application that automatically discovers and displays pages based on directory structure.
+A personal dashboard and assistant that brings together the tools and information I use daily into a single, locally-hosted interface.
 
-## Configuration
+## What It Does
 
-Before running Skye, you need to set up your environment and configuration files.
+- **Stock Market Dashboard** - Track portfolio value, stock prices (AMZN, ORCL), EUR/USD rates, XRP, and gold with interactive charts
+- **Music Recommendations** - Discover new music based on listening history
+- **Weather** - Local weather and sunrise/sunset times
+- **Gemini AI Chat** - Chat interface for Google's Gemini AI
+- **YouTube Tools** - Playlist management and audio downloading
+- **To-Do List** - Simple task tracking
+- **Logs Viewer** - Monitor application logs
 
-### 1. Environment Variables
+## Is This For You?
 
-Copy the example environment file and fill in your values:
+Probably not as-is. Skye is built for my specific needs - tracking my particular stocks, my portfolio configuration, my preferred tools. The included pages are tailored to how I work.
 
-```bash
-cp config/.env.example .env
-```
+**However**, the architecture is designed to be easily adapted. The page system auto-discovers modules, so you can:
+1. Delete the pages you don't need
+2. Add your own pages with your own functionality
+3. Keep the infrastructure (caching, error handling, dark mode, etc.)
 
-Edit `.env` with your API keys:
+Think of it as a template for building your own personal dashboard.
 
-| Variable | Description | How to Get |
-|----------|-------------|------------|
-| `GEMINI_API_KEY` | Google Gemini AI API key | [Google AI Studio](https://aistudio.google.com/apikey) |
-| `YOUTUBE_API_KEY` | YouTube Data API key | [Google Cloud Console](https://console.cloud.google.com/apis/credentials) |
-| `YOUTUBE_CLIENT_ID` | YouTube OAuth client ID | Google Cloud Console > OAuth 2.0 Client IDs |
-| `YOUTUBE_CLIENT_SECRET` | YouTube OAuth client secret | Google Cloud Console > OAuth 2.0 Client IDs |
+## Documentation
 
-### 2. Config File
-
-Create `config/config.json`:
-
-```json
-{
-  "gemini_api_key": "your_gemini_api_key_here",
-  "youtube_api_key": "your_youtube_api_key_here",
-  "portfolio": {
-    "amzn_shares": 0,
-    "cash_assets_eur": 0,
-    "xrp_quantity": 0
-  }
-}
-```
-
-> Note: The app checks both `.env` and `config/config.json` for settings. You can use either or both.
-
-### 3. Portfolio Settings (Optional)
-
-The Market Dashboard displays portfolio values. Configure these in `.env` or `config/config.json`:
-
-| Variable | Description |
-|----------|-------------|
-| `AMZN_SHARES` | Number of Amazon shares owned |
-| `CASH_ASSETS_EUR` | Cash assets in EUR |
-| `XRP_QUANTITY` | Number of XRP coins owned |
+- [API Reference](docs/API.md) - Complete API endpoint documentation
+- [Development Guide](docs/DEVELOPMENT.md) - Setup, architecture, and how to add pages
 
 ## Quick Start
 
-### Option 1: Simple Start
 ```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Copy and configure environment
+cp config/.env.example .env
+# Edit .env with your API keys
+
+# Run
 python3 app.py
-```
-
-### Option 2: Always Running (Recommended)
-```bash
-./scripts/launch_skye.sh
-```
-
-### Option 3: Manual Control
-```bash
-./scripts/start_skye.sh start    # Start Skye
-./scripts/start_skye.sh status   # Check status
-./scripts/start_skye.sh stop     # Stop Skye
-./scripts/start_skye.sh restart  # Restart Skye
-```
-
-### Option 4: Full Installation
-```bash
-python3 scripts/install.py
 ```
 
 Visit http://localhost:5001
 
-## Keep-Alive Features
+## Configuration
 
-- **Auto-restart**: Automatically restarts if Skye crashes
-- **Health monitoring**: Checks every 30 seconds if Skye is responding
-- **Process management**: Tracks PID and handles clean shutdowns
-- **Logging**: Logs output to `skye.log`
+### API Keys
 
-## Adding New Pages
+| Variable | Purpose |
+|----------|---------|
+| `GEMINI_API_KEY` | Gemini AI chat |
+| `YOUTUBE_API_KEY` | YouTube features |
+| `YOUTUBE_CLIENT_ID` | YouTube OAuth |
+| `YOUTUBE_CLIENT_SECRET` | YouTube OAuth |
 
-To add a new page/tab, simply create a new directory in the `pages/` folder:
+### Portfolio (for Market Dashboard)
 
-### Method 1: Static HTML Content
+| Variable | Purpose |
+|----------|---------|
+| `AMZN_SHARES` | Amazon shares owned |
+| `CASH_ASSETS_EUR` | EUR cash holdings |
+| `XRP_QUANTITY` | XRP quantity |
 
-1. Create directory: `pages/my-new-page/`
-2. Add `config.py`:
+## Adding Your Own Pages
+
+Create a directory in `pages/` with:
+
+**config.py:**
 ```python
-PAGE_NAME = "My New Page"
-PAGE_DESCRIPTION = "Description of what this page does"
-PAGE_ICON = "fas fa-star"  # FontAwesome icon class
+PAGE_NAME = "My Page"
+PAGE_DESCRIPTION = "What it does"
+PAGE_ICON = "fas fa-star"
 ```
-3. Add `content.html` with your HTML content
 
-### Method 2: Dynamic Python Content
-
-1. Create directory: `pages/my-dynamic-page/`
-2. Add `config.py` (same as above)
-3. Add `page.py`:
+**Either** `content.html` (static) **or** `page.py` (dynamic):
 ```python
 def get_content():
-    return {
-        'html': '''
-        <h2>Dynamic Content</h2>
-        <p>Generated at runtime</p>
-        '''
-    }
+    return {'html': '<h2>Hello</h2>'}
 ```
 
-## Page Structure
-
-```
-pages/
-├── dashboard/
-│   ├── config.py      # Page configuration
-│   └── page.py        # Dynamic content generator
-├── tools/
-│   ├── config.py      # Page configuration
-│   └── content.html   # Static HTML content
-├── reports/
-│   ├── config.py      # Page configuration
-│   └── page.py        # Dynamic content generator
-└── q-portal/
-    ├── config.py      # Page configuration
-    └── content.html   # Q chat interface
-```
+Pages are auto-discovered on startup.
 
 ## Features
 
-- **Automatic Discovery**: Pages are automatically detected and added to tabs
-- **Two Content Types**: Static HTML or dynamic Python-generated content
-- **Responsive Design**: Works on desktop and mobile
-- **Easy Styling**: Each page can include its own CSS and JavaScript
-- **Icon Support**: FontAwesome icons for tabs and pages
-- **Q Integration**: Real Amazon Q chat interface
-- **Always Running**: Keep-alive monitoring ensures uptime
+- **Auto-discovery** - Drop a page folder in `pages/`, it appears automatically
+- **Dark mode** - Toggle with the moon icon or press `D`
+- **Keyboard shortcuts** - Press `?` to see them
+- **Caching** - API responses are cached for performance
+- **Circuit breaker** - Graceful handling when external APIs fail
+- **Health endpoint** - `/health` for monitoring
+- **Keep-alive** - Optional scripts to auto-restart on crash
 
-## Configuration Options
+## Running Options
 
-In `config.py`:
-- `PAGE_NAME`: Display name in tab
-- `PAGE_DESCRIPTION`: Description shown on welcome screen
-- `PAGE_ICON`: FontAwesome icon class
+```bash
+# Simple
+python3 app.py
 
-## Content Methods
+# With auto-restart on crash
+./scripts/launch_skye.sh
 
-### Static HTML (`content.html`)
-- Simple HTML file
-- Can include `<style>` and `<script>` tags
-- Good for simple, static content
-
-### Dynamic Python (`page.py`)
-- Must have `get_content()` function
-- Returns dictionary with `html` key
-- Can generate content dynamically
-- Access to full Python ecosystem
-
-## Examples
-
-See the included example pages:
-- `dashboard/` - Dynamic Python content with metrics
-- `tools/` - Static HTML with interactive elements
-- `reports/` - Dynamic Python content with data processing
-- `q-portal/` - Real Amazon Q chat interface
+# Manual control
+./scripts/start_skye.sh start|stop|status|restart
+```

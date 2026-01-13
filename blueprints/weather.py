@@ -6,11 +6,13 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from flask import Blueprint, jsonify, request, current_app
 import requests
+from utils.cache import cache, CACHE_TIMEOUT_WEATHER, CACHE_TIMEOUT_SUN
 
 weather_bp = Blueprint('weather', __name__)
 
 
 @weather_bp.route('/api/weather', methods=['GET'])
+@cache.cached(timeout=CACHE_TIMEOUT_WEATHER, query_string=True)
 def get_weather():
     """Get weather forecast from Met Éireann API"""
     try:
@@ -112,6 +114,7 @@ def get_weather():
 
 
 @weather_bp.route('/api/sun-times', methods=['GET'])
+@cache.cached(timeout=CACHE_TIMEOUT_SUN, query_string=True)
 def get_sun_times():
     """Get sunrise and sunset times from sunrise-sunset.org API"""
     try:
