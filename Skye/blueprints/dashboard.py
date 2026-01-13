@@ -6,6 +6,7 @@ from datetime import datetime
 from flask import Blueprint, jsonify, request, current_app
 import requests
 from utils import handle_api_errors, api_client
+from utils.config import get_config_value
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -553,9 +554,13 @@ def get_sell_recommendation():
 
 @dashboard_bp.route('/api/portfolio-value')
 def get_portfolio_value():
-    """Get portfolio value of 287 AMZN shares in EUR over time"""
+    """Get portfolio value of AMZN shares in EUR over time"""
     try:
         from datetime import datetime
+
+        # Get AMZN shares from config
+        portfolio = get_config_value('portfolio', {})
+        amzn_shares = int(portfolio.get('amzn_shares', 0))
 
         period = request.args.get('period', '1y')
 
@@ -614,8 +619,8 @@ def get_portfolio_value():
                             dates.append(date_obj.strftime('%b %d'))
                         else:
                             dates.append(date_obj.strftime('%b %d'))
-                        # Calculate portfolio value: 287 shares * price in USD * USD to EUR rate
-                        portfolio_value_eur = 287 * close * usd_eur_rate
+                        # Calculate portfolio value: shares * price in USD * USD to EUR rate
+                        portfolio_value_eur = amzn_shares * close * usd_eur_rate
                         values.append(round(portfolio_value_eur, 2))
 
                 if dates and values:
@@ -632,7 +637,7 @@ def get_portfolio_value():
                         'changeAmount': round(change_amount, 2),
                         'changePercent': round(change_percent, 2),
                         'usdEurRate': round(usd_eur_rate, 4),
-                        'shares': 287
+                        'shares': amzn_shares
                     })
 
         return jsonify({'error': 'Portfolio data unavailable'}), 503
@@ -642,9 +647,13 @@ def get_portfolio_value():
 
 @dashboard_bp.route('/api/cash-assets-value')
 def get_cash_assets_value():
-    """Get historical value of EUR cash assets (105,595.85 EUR today) converted to what they were worth over time"""
+    """Get historical value of EUR cash assets converted to what they were worth over time"""
     try:
         from datetime import datetime
+
+        # Get cash assets from config
+        portfolio = get_config_value('portfolio', {})
+        eur_cash = int(portfolio.get('cash_assets_eur', 0))
 
         period = request.args.get('period', '1y')
 
@@ -676,7 +685,6 @@ def get_cash_assets_value():
 
                 # Get current rate to calculate the USD equivalent
                 current_eur_usd_rate = eur_usd_rates[-1] if eur_usd_rates[-1] else 1.17
-                eur_cash = 105595.85
                 usd_cash = eur_cash * current_eur_usd_rate
 
                 dates = []

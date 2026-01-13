@@ -1,10 +1,24 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+from utils.config import get_config_value
+
 def get_content():
     """Return the HTML content for the dashboard page"""
-    
+
+    # Load portfolio values from config
+    portfolio = get_config_value('portfolio', {})
+    amzn_shares = int(portfolio.get('amzn_shares', 0))
+    cash_assets_eur = int(portfolio.get('cash_assets_eur', 0))
+    xrp_quantity = int(portfolio.get('xrp_quantity', 0))
+
+    # Format values for display
+    cash_assets_formatted = "{:,}".format(cash_assets_eur)
+
     html_content = '''
         <div class="dashboard-page">
             <h2><i class="fas fa-chart-line"></i> Market Dashboard</h2>
-            
+
             <div class="charts-container">
                 <div class="chart-section">
                     <div class="widget-header">
@@ -24,7 +38,7 @@ def get_content():
 
                 <div class="chart-section">
                     <div class="widget-header">
-                        <h3><i class="fas fa-wallet"></i> Portfolio Value (287 AMZN Shares)</h3>
+                        <h3><i class="fas fa-wallet"></i> Portfolio Value (''' + str(amzn_shares) + ''' AMZN Shares)</h3>
                         <select id="portfolioPeriodSelect" class="period-selector">
                             <option value="1d">1 Day</option>
                             <option value="1wk">1 Week</option>
@@ -56,7 +70,7 @@ def get_content():
 
                 <div class="chart-section">
                     <div class="widget-header">
-                        <h3><i class="fas fa-money-bill-wave"></i> Cash Assets (€105,596)</h3>
+                        <h3><i class="fas fa-money-bill-wave"></i> Cash Assets (€''' + cash_assets_formatted + ''')</h3>
                         <select id="cashPeriodSelect" class="period-selector">
                             <option value="1d">1 Day</option>
                             <option value="1wk">1 Week</option>
@@ -105,7 +119,7 @@ def get_content():
 
                 <div class="chart-section">
                     <div class="widget-header">
-                        <h3><i class="fas fa-coins"></i> XRP (1400 Coins)</h3>
+                        <h3><i class="fas fa-coins"></i> XRP (''' + str(xrp_quantity) + ''' Coins)</h3>
                         <select id="xrpPeriodSelect" class="period-selector">
                             <option value="1d">1 Day</option>
                             <option value="1wk">1 Week</option>
@@ -277,6 +291,12 @@ def get_content():
     js_code = '''
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
+        // Portfolio configuration from config file
+        const PORTFOLIO_CONFIG = {
+            amznShares: ''' + str(amzn_shares) + ''',
+            cashAssetsEur: ''' + str(cash_assets_eur) + ''',
+            xrpQuantity: ''' + str(xrp_quantity) + '''
+        };
         async function fetchWithRetry(url, retries = 3) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -378,8 +398,8 @@ def get_content():
                 if (data.dates && data.prices) {
                     console.log('XRP data received:', data.dates.length, 'data points');
 
-                    // Calculate investment value (1400 XRP)
-                    const investmentValues = data.prices.map(price => price * 1400);
+                    // Calculate investment value using config
+                    const investmentValues = data.prices.map(price => price * PORTFOLIO_CONFIG.xrpQuantity);
 
                     // Update current price display with both values
                     const currentPrice = data.prices[data.prices.length - 1];
@@ -410,7 +430,7 @@ def get_content():
                                     yAxisID: 'y'
                                 },
                                 {
-                                    label: '1400 XRP Investment (€)',
+                                    label: `${PORTFOLIO_CONFIG.xrpQuantity} XRP Investment (€)`,
                                     data: investmentValues,
                                     borderColor: '#10b981',
                                     backgroundColor: 'rgba(16, 185, 129, 0.1)',

@@ -19,7 +19,10 @@ def load_config():
         'YOUTUBE_API_KEY': 'youtube_api_key',
         'YOUTUBE_CLIENT_ID': ('youtube_oauth', 'client_id'),
         'YOUTUBE_CLIENT_SECRET': ('youtube_oauth', 'client_secret'),
-        'USER_NAME': 'user_name'
+        'USER_NAME': 'user_name',
+        'AMZN_SHARES': ('portfolio', 'amzn_shares'),
+        'CASH_ASSETS_EUR': ('portfolio', 'cash_assets_eur'),
+        'XRP_QUANTITY': ('portfolio', 'xrp_quantity')
     }
     
     placeholders = ['your_api_key_here', 'your_key_here', 'your_gemini_api_key_here', 'your_youtube_api_key_here', 'your_client_id_here', 'your_client_secret_here']
@@ -32,8 +35,8 @@ def load_config():
             else:
                 value = config.get(config_key)
             
-            if value and value not in placeholders:
-                os.environ[env_var] = value
+            if value is not None and value not in placeholders:
+                os.environ[env_var] = str(value)
     
     # Second: Allow environment variables to override config.json
     for env_var, config_key in env_mappings.items():
