@@ -4,6 +4,7 @@ config/.env
 
 # Configuration files (keep examples)
 config/config.json
+config/todo_data.json
 config/music_recommendations.json
 
 # Python
@@ -11,5 +12,9 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Logs
+# Logs and runtime files
 *.log
+*.pid
+
+# macOS
+.DS_Store
