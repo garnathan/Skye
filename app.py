@@ -49,6 +49,7 @@ from blueprints.gemini import gemini_bp
 from blueprints.youtube import youtube_bp
 from blueprints.dashboard import dashboard_bp
 from blueprints.todo import todo_bp
+from blueprints.claude import claude_bp
 
 app.register_blueprint(weather_bp)
 app.register_blueprint(logs_bp)
@@ -59,6 +60,7 @@ app.register_blueprint(gemini_bp)
 app.register_blueprint(youtube_bp)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(todo_bp)
+app.register_blueprint(claude_bp)
 
 def discover_pages():
     """Automatically discover pages from the pages directory"""

@@ -16,6 +16,7 @@ def load_config():
     
     env_mappings = {
         'GEMINI_API_KEY': 'gemini_api_key',
+        'ANTHROPIC_API_KEY': 'anthropic_api_key',
         'YOUTUBE_API_KEY': 'youtube_api_key',
         'YOUTUBE_CLIENT_ID': ('youtube_oauth', 'client_id'),
         'YOUTUBE_CLIENT_SECRET': ('youtube_oauth', 'client_secret'),

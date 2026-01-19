@@ -3,5 +3,6 @@ Flask-Caching
 requests
 yt-dlp
 google-generativeai
+anthropic
 python-dotenv
 psutil
